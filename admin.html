@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>半岛医疗招聘 - 筛选条件提交记录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background: #fff9f6;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #f0e6e1;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        .navbar-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #00b38a;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            height: 32px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .nav-logo {
+            height: 34px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .nav-links {
+            margin-left: 40px;
+            display: flex;
+            gap: 28px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #414a60;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #00b38a;
+        }
+
+        .nav-right {
+            margin-left: auto;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 20px 60px;
+        }
+
+        .page-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .page-header .subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-box {
+            padding: 8px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            width: 220px;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: #ff7a45;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #ff7a45;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #ff6a2e;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #ff7a45;
+            color: #ff7a45;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px 24px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .stat-icon.green { background: #e8f7f2; color: #00b38a; }
+        .stat-icon.orange { background: #fff3eb; color: #ff7a45; }
+        .stat-icon.red { background: #fef0f0; color: #ff4d4f; }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #222;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .record-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .record-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+            border-left: 4px solid #ff7a45;
+            transition: box-shadow 0.2s;
+        }
+
+        .record-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .record-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .record-meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .record-badges {
+            display: flex;
+            gap: 6px;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-orange { background: #fff3eb; color: #ff7a45; }
+        .badge-green { background: #e8f7f2; color: #00b38a; }
+        .badge-gray { background: #f5f5f5; color: #666; }
+
+        .record-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .info-item strong {
+            color: #333;
+            margin-right: 4px;
+        }
+
+        .tags-section {
+            margin-bottom: 10px;
+        }
+
+        .tags-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .tag-orange { background: #fff3eb; color: #ff7a45; }
+        .tag-blue { background: #f0f5ff; color: #3a7afe; }
+        .tag-green { background: #e8f7f2; color: #00b38a; }
+        .tag-gray { background: #f5f5f5; color: #666; }
+
+        .record-remarks {
+            font-size: 13px;
+            color: #666;
+            padding: 10px 12px;
+            background: #fff8f5;
+            border-radius: 8px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #f5f5f5;
+        }
+
+        .action-btn {
+            padding: 5px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            background: #fff;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            border-color: #ff7a45;
+            color: #ff7a45;
+        }
+
+        .action-btn.danger:hover {
+            border-color: #ff4d4f;
+            color: #ff4d4f;
+        }
+
+        .empty-state {
+            background: #fff;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state a {
+            color: #ff7a45;
+            text-decoration: none;
+            margin-top: 12px;
+            display: inline-block;
+        }
+
+        /* 详情弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .modal-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .modal-body {
+            padding: 24px 28px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            font-size: 15px;
+            color: #222;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .modal-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-field {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .modal-field-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 2px;
+        }
+
+        .modal-field-value {
+            font-size: 14px;
+            color: #333;
+        }
+
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .stats-row { flex-direction: column; }
+            .toolbar { flex-wrap: wrap; }
+            .search-box { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="半岛医疗招聘" class="logo-img">
+                <span>筛选条件提交记录</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">筛选条件提交</a>
+                <a href="admin.html" class="active">提交记录管理</a>
+            </div>
+            <div class="nav-right">
+                <img src="logo.png" alt="半岛医疗招聘" class="nav-logo">
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="page-header">
+            <div>
+                <h1>筛选条件提交记录</h1>
+                <div class="subtitle">查看所有部门提交的BOSS直聘筛选条件</div>
+            </div>
+            <div class="toolbar">
+                <input type="text" class="search-box" id="searchBox" placeholder="搜索职位/部门/提交人..." oninput="renderRecords()">
+                <button class="btn btn-primary" onclick="exportData()">导出全部</button>
+                <button class="btn btn-secondary" onclick="refreshData()">刷新</button>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon green">&#128203;</div>
+                <div>
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">总提交数</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">&#128204;</div>
+                <div>
+                    <div class="stat-value" id="statPositions">0</div>
+                    <div class="stat-label">不同岗位数</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="record-list" id="recordList"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">详情</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let allRecords = [];
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/submissions');
+                const result = await response.json();
+                allRecords = result.data || [];
+            } catch (err) {
+                const local = JSON.parse(localStorage.getItem('boss_submissions') || '[]');
+                allRecords = local;
+            }
+            renderRecords();
+        }
+
+        function renderRecords() {
+            const list = document.getElementById('recordList');
+            const keyword = document.getElementById('searchBox').value.toLowerCase();
+            
+            let records = allRecords;
+            if (keyword) {
+                records = allRecords.filter(r => {
+                    const submitter = r.submitter || {};
+                    const jobTitle = r.jobTitle || (r.job ? r.job.title : '') || '未命名';
+                    const name = submitter.name || '';
+                    return `${jobTitle} ${name}`.toLowerCase().includes(keyword);
+                });
+            }
+
+            // 统计
+            document.getElementById('statTotal').textContent = allRecords.length;
+            const positions = new Set(allRecords.map(r => r.jobTitle || (r.job ? r.job.title : '')).filter(Boolean));
+            document.getElementById('statPositions').textContent = positions.size;
+
+            if (records.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128203;</div>
+                        <p>暂无提交记录</p>
+                        <a href="index.html">去提交筛选条件 &rarr;</a>
+                    </div>
+                `;
+                return;
+            }
+
+            records.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+            list.innerHTML = records.map(r => {
+                const realIdx = allRecords.indexOf(r);
+                const submitter = r.submitter || {};
+                const jobTitle = r.jobTitle || (r.job ? r.job.title : '未命名岗位');
+                const date = new Date(r.submittedAt).toLocaleString('zh-CN');
+                const ageText = r.age ? 
+                    (r.age.max === 'unlimited' ? (r.age.min === 16 ? '不限' : `${r.age.min} - 不限`) : `${r.age.min} - ${r.age.max}`)
+                    : '不限';
+                
+                const majorText = r.major && r.major.values && r.major.values.length > 0
+                    ? r.major.values.join('、')
+                    : (r.major?.type || '不限');
+                
+                const experience = (r.experience || []).slice(0, 4);
+                const education = (r.education || []).slice(0, 4);
+                const school = (r.school?.values || []).slice(0, 4);
+                const jobIntention = (r.jobIntention || []).slice(0, 4);
+
+                return `
+                    <div class="record-card">
+                        <div class="record-header">
+                            <div>
+                                <div class="record-title">${escapeHtml(jobTitle)}</div>
+                                <div class="record-meta">提交人：${escapeHtml(submitter.name || '-')} | ${date}</div>
+                            </div>
+                            <div class="record-badges">
+                                <span class="badge badge-orange">${escapeHtml(r.activity || '不限')}</span>
+                            </div>
+                        </div>
+                        <div class="record-info">
+                            <div class="info-item"><strong>年龄:</strong>${escapeHtml(ageText)}</div>
+                            <div class="info-item"><strong>性别:</strong>${escapeHtml(r.gender || '不限')}</div>
+                            <div class="info-item"><strong>专业:</strong>${escapeHtml(majorText)}</div>
+                            <div class="info-item"><strong>薪资:</strong>${escapeHtml(r.salary || '不限')}</div>
+                            <div class="info-item"><strong>求职意向:</strong>${escapeHtml(jobIntention.join('、'))}</div>
+                            <div class="info-item"><strong>学历:</strong>${escapeHtml(education.join('、'))}</div>
+                            <div class="info-item"><strong>经验:</strong>${escapeHtml(experience.join('、'))}</div>
+                            <div class="info-item"><strong>院校:</strong>${escapeHtml(school.join('、'))}</div>
+                            <div class="info-item"><strong>跳槽:</strong>${escapeHtml(r.jobHop || '不限')}</div>
+                        </div>
+                        ${r.remarks ? `<div class="record-remarks">备注：${escapeHtml(r.remarks)}</div>` : ''}
+                        <div class="record-actions">
+                            <button class="action-btn" onclick="viewDetail(${realIdx})">查看详情</button>
+                            <button class="action-btn" onclick="exportSingle(${realIdx})">导出此条</button>
+                            <button class="action-btn danger" onclick="deleteRecord(${realIdx})">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewDetail(idx) {
+            const r = allRecords[idx];
+            if (!r) return;
+            
+            const submitter = r.submitter || {};
+            const jobTitle = r.jobTitle || (r.job ? r.job.title : '未命名岗位');
+            document.getElementById('modalTitle').textContent = jobTitle;
+            const date = new Date(r.submittedAt).toLocaleString('zh-CN');
+            const ageText = r.age ? 
+                (r.age.max === 'unlimited' ? (r.age.min === 16 ? '不限' : `${r.age.min} - 不限`) : `${r.age.min} - ${r.age.max}`)
+                : '不限';
+            const majorText = r.major && r.major.values && r.major.values.length > 0
+                ? r.major.values.join('、')
+                : (r.major?.type || '不限');
+            
+            const formatTags = (arr, cls) => {
+                if (!arr || arr.length === 0 || (arr.length === 1 && arr[0] === '不限')) {
+                    return '<span style="color:#999;font-size:13px">不限</span>';
+                }
+                return arr.filter(v => v !== '不限').map(v => `<span class="tag ${cls}">${escapeHtml(v)}</span>`).join('');
+            };
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="modal-section">
+                    <h3>提交人信息</h3>
+                    <div class="modal-row">
+                        <div class="modal-field"><div class="modal-field-label">姓名</div><div class="modal-field-value">${escapeHtml(submitter.name || '-')}</div></div>
+                        <div class="modal-field"><div class="modal-field-label">提交时间</div><div class="modal-field-value">${date}</div></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <h3>基础筛选</h3>
+                    <div class="modal-row">
+                        <div class="modal-field"><div class="modal-field-label">岗位名称</div><div class="modal-field-value">${escapeHtml(jobTitle)}</div></div>
+                        <div class="modal-field"><div class="modal-field-label">年龄</div><div class="modal-field-value">${escapeHtml(ageText)}</div></div>
+                    </div>
+                    <div class="modal-row">
+                        <div class="modal-field"><div class="modal-field-label">专业</div><div class="modal-field-value">${escapeHtml(majorText)}</div></div>
+                        <div class="modal-field"><div class="modal-field-label">性别</div><div class="modal-field-value">${escapeHtml(r.gender || '不限')}</div></div>
+                    </div>
+                    <div class="modal-row">
+                        <div class="modal-field"><div class="modal-field-label">活跃度</div><div class="modal-field-value">${escapeHtml(r.activity || '不限')}</div></div>
+                        <div class="modal-field"><div class="modal-field-label">近期没有看过</div><div class="modal-field-value">${escapeHtml(r.recentViewed || '不限')}</div></div>
+                    </div>
+                    <div class="modal-row">
+                        <div class="modal-field"><div class="modal-field-label">是否与同事交换简历</div><div class="modal-field-value">${escapeHtml(r.exchangedResume || '不限')}</div></div>
+                        <div class="modal-field"><div class="modal-field-label">跳槽频率</div><div class="modal-field-value">${escapeHtml(r.jobHop || '不限')}</div></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <h3>院校要求</h3>
+                    <div class="tags" style="margin-bottom:10px">
+                        ${formatTags(r.school?.values, 'tag-orange')}
+                    </div>
+                    ${r.school?.firstDegreeOnly ? '<div class="tag tag-green">只看第一学历（全日制本科）</div>' : ''}
+                </div>
+                <div class="modal-section">
+                    <h3>经验要求</h3>
+                    <div class="tags">${formatTags(r.experience, 'tag-blue')}</div>
+                </div>
+                <div class="modal-section">
+                    <h3>学历要求</h3>
+                    <div class="tags">${formatTags(r.education, 'tag-orange')}</div>
+                </div>
+                <div class="modal-section">
+                    <h3>薪资待遇</h3>
+                    <div class="modal-field-value">${escapeHtml(r.salary || '不限')}</div>
+                </div>
+                <div class="modal-section">
+                    <h3>求职意向</h3>
+                    <div class="tags">${formatTags(r.jobIntention, 'tag-green')}</div>
+                </div>
+                ${r.remarks ? `
+                    <div class="modal-section">
+                        <h3>其他备注</h3>
+                        <div class="modal-field-value" style="white-space:pre-wrap">${escapeHtml(r.remarks)}</div>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        async function deleteRecord(idx) {
+            if (!confirm('确认删除这条记录？删除后不可恢复。')) return;
+            try {
+                await fetch(`/api/submissions/${allRecords[idx].id}`, { method: 'DELETE' });
+            } catch (err) {
+                const local = JSON.parse(localStorage.getItem('boss_submissions') || '[]');
+                if (local[idx]) {
+                    local.splice(idx, 1);
+                    localStorage.setItem('boss_submissions', JSON.stringify(local));
+                }
+            }
+            await loadData();
+        }
+
+        function exportSingle(idx) {
+            const record = allRecords[idx];
+            const blob = new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' });
+            downloadBlob(blob, `筛选条件_${record.jobTitle || (record.job ? record.job.title : '岗位')}.json`);
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(allRecords, null, 2)], { type: 'application/json' });
+            downloadBlob(blob, `筛选条件汇总_${new Date().toISOString().slice(0, 10)}.json`);
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function refreshData() {
+            loadData();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

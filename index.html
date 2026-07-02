@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>半岛医疗招聘 - 简历筛选条件提交</title>
+    <style>
+        * {
+            margin:0;
+            padding:0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background: #fff9f6;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #f0e6e1;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .navbar-inner {
+            max-width: 100%;
+            margin: 0 auto;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-logo {
+            height: 34px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        /* ========== 主体布局：左侧职位列表 + 右侧表单 ========== */
+        .body-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 左侧职位列表 */
+        .job-list-panel {
+            width: 260px;
+            min-width: 260px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+            height: fit-content;
+            position: sticky;
+            top: 80px;
+        }
+
+        .job-list-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .job-list-title .count {
+            background: #ff7a45;
+            color: #fff;
+            font-size: 12px;
+            padding: 1px 8px;
+            border-radius: 10px;
+        }
+
+        .job-list-empty {
+            text-align: center;
+            color: #ccc;
+            font-size: 13px;
+            padding: 30px 0;
+        }
+
+        .job-list-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .job-list-item:hover {
+            background: #fff3eb;
+        }
+
+        .job-list-item.active {
+            background: #fff3eb;
+            border-color: #ff7a45;
+        }
+
+        .job-list-item .job-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .job-list-item .job-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .job-list-item .job-delete {
+            float: right;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .job-list-item .job-delete:hover {
+            color: #ff4d4f;
+        }
+
+        /* 右侧表单区 */
+        .form-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .page-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+
+        .page-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 6px;
+        }
+
+        .page-header .subtitle {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* 筛选卡片 */
+        .filter-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            min-height: 36px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            width: 110px;
+            min-width: 110px;
+            padding-top: 8px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .filter-options {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-options.column {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* 筛选按钮 - 修复多选bug：改用div而不是label */
+        .filter-option {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666;
+            background: #f8f8f8;
+            border: 1px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-option:hover {
+            color: #ff7a45;
+            background: #fff3eb;
+        }
+
+        .filter-option.selected {
+            background: #ff7a45;
+            color: #fff;
+            border-color: #ff7a45;
+        }
+
+        /* 修改筛选专业按钮 */
+        .modify-link {
+            color: #ff7a45;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 0;
+        }
+
+        .modify-link:hover {
+            text-decoration: underline;
+        }
+
+        .major-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .major-input {
+            flex: 1;
+            max-width: 360px;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .major-input:focus {
+            border-color: #ff7a45;
+        }
+
+        .major-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .major-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #fff3eb;
+            color: #ff7a45;
+            border-radius: 16px;
+            font-size: 13px;
+        }
+
+        .major-tag .remove {
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .major-tag .remove:hover {
+            opacity: 1;
+        }
+
+        /* 双滑块 */
+        .age-slider-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 4px 0;
+        }
+
+        .age-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+
+        .age-display .value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .slider-track {
+            position: relative;
+            height: 6px;
+            background: #e8e8e8;
+            border-radius: 3px;
+            margin: 0 8px;
+        }
+
+        .slider-fill {
+            position: absolute;
+            height: 100%;
+            background: #ff7a45;
+            border-radius: 3px;
+            top: 0;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border: 2px solid #ff7a45;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 2;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .slider-thumb:hover,
+        .slider-thumb.dragging {
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 2px 8px rgba(255,122,69,0.3);
+        }
+
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 8px;
+            padding: 0 8px;
+        }
+
+        /* 子选项（只看第一学历） */
+        .sub-option {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px 16px;
+            background: #fff8f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .sub-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #ff7a45;
+            cursor: pointer;
+        }
+
+        .sub-option label {
+            cursor: pointer;
+        }
+
+        /* 岗位名称输入 */
+        .job-title-input {
+            width: 100%;
+            max-width: 360px;
+            padding: 9px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .job-title-input:focus {
+            border-color: #ff7a45;
+            box-shadow: 0 0 0 2px rgba(255,122,69,0.1);
+        }
+
+        /* 提交人信息区 */
+        .submitter-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .submitter-field {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .submitter-field label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .submitter-field .required {
+            color: #ff4d4f;
+            margin-left: 2px;
+        }
+
+        .submitter-field input,
+        .submitter-field select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .submitter-field input:focus,
+        .submitter-field select:focus {
+            border-color: #ff7a45;
+        }
+
+        /* 提交栏 */
+        .submit-bar {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+
+        .submit-bar .tips {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .btn {
+            padding: 10px 32px;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #ff7a45;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #ff6a2e;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #ff7a45;
+            color: #ff7a45;
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+            padding: 8px 20px;
+            font-size: 13px;
+        }
+
+        .btn-danger:hover {
+            background: #fff1f0;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            min-width: 280px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { background: #e8f7f2; color: #00b38a; }
+        .toast.error .toast-icon { background: #fef0f0; color: #ff4d4f; }
+
+        .toast .toast-content .toast-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .toast .toast-content .toast-desc {
+            font-size: 13px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        /* 加载遮罩 */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8e8e8;
+            border-top-color: #ff7a45;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 860px) {
+            .body-layout {
+                flex-direction: column;
+            }
+            .job-list-panel {
+                width: 100%;
+                min-width: 0;
+                position: static;
+            }
+            .filter-row {
+                flex-direction: column;
+            }
+            .filter-label {
+                width: 100%;
+                padding-top: 0;
+                margin-bottom: 8px;
+            }
+            .submit-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .submit-bar .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="index.html" class="logo">
+                <span>简历筛选条件提交</span>
+            </a>
+            <div class="nav-right">
+                <img src="logo.png" alt="半岛医疗招聘" class="nav-logo">
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体：左侧职位列表 + 右侧表单 -->
+    <div class="body-layout">
+
+        <!-- 左侧职位列表 -->
+        <div class="job-list-panel">
+            <div class="job-list-title">
+                <span>已提交职位</span>
+                <span class="count" id="jobCount">0</span>
+            </div>
+            <div id="jobListEmpty" class="job-list-empty">暂无提交记录</div>
+            <div id="jobList"></div>
+        </div>
+
+        <!-- 右侧表单区 -->
+        <div class="form-area">
+
+            <div class="page-header">
+                <h1 id="formTitle">半岛医疗招聘 · 简历筛选条件提交</h1>
+                <div class="subtitle">HR内部沟通使用，填写后将由专人统一在BOSS直聘平台进行筛选</div>
+            </div>
+
+            <form id="screeningForm">
+
+                <!-- 提交人信息 -->
+                <div class="filter-card">
+
+                    <div class="filter-row" style="align-items: center;">
+                        <div class="filter-label" style="padding-top:0;">提交人信息</div>
+                        <div class="filter-options">
+                            <div class="submitter-row" style="width:100%;">
+                                <div class="submitter-field">
+                                    <label>姓名<span class="required">*</span></label>
+                                    <input type="text" name="submitterName" placeholder="请输入姓名" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 筛选条件 -->
+                <div class="filter-card">
+
+                    <!-- 岗位名称 -->
+                    <div class="filter-row">
+                        <div class="filter-label">岗位名称</div>
+                        <div class="filter-options">
+                            <input type="text" class="job-title-input" name="jobTitle" placeholder="请输入岗位名称" required>
+                        </div>
+                    </div>
+
+                    <!-- 年龄 -->
+                    <div class="filter-row">
+                        <div class="filter-label">年龄</div>
+                        <div class="filter-options column">
+                            <div class="age-slider-container">
+                                <div class="age-display">
+                                    <span>16</span>
+                                    <span class="value" id="ageValue">不限</span>
+                                    <span>不限</span>
+                                </div>
+                                <div class="slider-track" id="ageSlider">
+                                    <div class="slider-fill" id="ageFill"></div>
+                                    <div class="slider-thumb" id="ageThumbMin"></div>
+                                    <div class="slider-thumb" id="ageThumbMax"></div>
+                                </div>
+                                <div class="slider-scale">
+                                    <span>16</span><span>25</span><span>35</span><span>45</span><span>60</span><span>不限</span>
+                                </div>
+                            </div>
+                            <input type="hidden" name="ageMin" id="ageMinInput" value="16">
+                            <input type="hidden" name="ageMax" id="ageMaxInput" value="unlimited">
+                        </div>
+                    </div>
+
+                    <!-- 专业 -->
+                    <div class="filter-row">
+                        <div class="filter-label">专业</div>
+                        <div class="filter-options column">
+                            <div class="filter-options" style="padding:0;">
+                                <div class="filter-option selected" data-group="major" data-value="不限">不限</div>
+                                <span class="modify-link" id="modifyMajorLink">修改筛选专业 ></span>
+                            </div>
+                            <div class="major-input-row" id="majorInputRow" style="display:none;">
+                                <input type="text" class="major-input" id="majorInput" placeholder="输入专业名称，按回车添加">
+                                <button type="button" class="btn btn-secondary" id="confirmMajorBtn" style="padding:8px 16px;font-size:13px;">确定</button>
+                            </div>
+                            <div class="major-tags" id="majorTags" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 活跃度 -->
+                    <div class="filter-row">
+                        <div class="filter-label">活跃度<br><span style="font-size:12px;color:#bbb;">[单选]</span></div>
+                        <div class="filter-options" data-group="activity" data-type="single">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="刚刚活跃">刚刚活跃</div>
+                            <div class="filter-option" data-value="今日活跃">今日活跃</div>
+                            <div class="filter-option" data-value="3日内活跃">3日内活跃</div>
+                            <div class="filter-option" data-value="本周活跃">本周活跃</div>
+                            <div class="filter-option" data-value="本月活跃">本月活跃</div>
+                        </div>
+                    </div>
+
+                    <!-- 性别 -->
+                    <div class="filter-row">
+                        <div class="filter-label">性别</div>
+                        <div class="filter-options" data-group="gender" data-type="single">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="男">男</div>
+                            <div class="filter-option" data-value="女">女</div>
+                        </div>
+                    </div>
+
+                    <!-- 近期没有看过 -->
+                    <div class="filter-row">
+                        <div class="filter-label">近期没有看过</div>
+                        <div class="filter-options" data-group="recentViewed" data-type="single">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="近14天没有">近14天没有</div>
+                        </div>
+                    </div>
+
+                    <!-- 是否与同事交换简历 -->
+                    <div class="filter-row">
+                        <div class="filter-label">是否与同事交换简历</div>
+                        <div class="filter-options" data-group="exchangedResume" data-type="single">
+                            <div class="filter-option" data-value="不限">不限</div>
+                            <div class="filter-option selected" data-value="近一个月没有">近一个月没有</div>
+                        </div>
+                    </div>
+
+                    <!-- 院校 -->
+                    <div class="filter-row">
+                        <div class="filter-label">院校</div>
+                        <div class="filter-options column" data-group="school" data-type="multi">
+                            <div class="filter-options" style="padding:0;">
+                                <div class="filter-option selected" data-value="不限">不限</div>
+                                <div class="filter-option" data-value="985">985</div>
+                                <div class="filter-option" data-value="211">211</div>
+                                <div class="filter-option" data-value="双一流院校">双一流院校</div>
+                                <div class="filter-option" data-value="留学">留学</div>
+                                <div class="filter-option" data-value="国内外名校">国内外名校</div>
+                                <div class="filter-option" data-value="公办本科">公办本科</div>
+                            </div>
+                            <div class="sub-option" id="firstDegreeOption" style="display:none;">
+                                <input type="checkbox" id="firstDegree">
+                                <label for="firstDegree">只看第一学历（第一学历为全日制本科）</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 跳槽频率 -->
+                    <div class="filter-row">
+                        <div class="filter-label">跳槽频率<br><span style="font-size:12px;color:#bbb;">[单选]</span></div>
+                        <div class="filter-options" data-group="jobHop" data-type="single">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="5年少于3份">5年少于3份</div>
+                            <div class="filter-option" data-value="平均每份工作大于一年">平均每份工作大于一年</div>
+                        </div>
+                    </div>
+
+                    <!-- 经验要求 -->
+                    <div class="filter-row">
+                        <div class="filter-label">经验要求</div>
+                        <div class="filter-options" data-group="experience" data-type="multi">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="在校/应届">在校/应届</div>
+                            <div class="filter-option" data-value="25年毕业">25年毕业</div>
+                            <div class="filter-option" data-value="26年毕业">26年毕业</div>
+                            <div class="filter-option" data-value="26年后毕业">26年后毕业</div>
+                            <div class="filter-option" data-value="1年以内">1年以内</div>
+                            <div class="filter-option" data-value="1-3年">1-3年</div>
+                            <div class="filter-option" data-value="3-5年">3-5年</div>
+                            <div class="filter-option" data-value="5-10年">5-10年</div>
+                            <div class="filter-option" data-value="10年以上">10年以上</div>
+                        </div>
+                    </div>
+
+                    <!-- 学历要求 -->
+                    <div class="filter-row">
+                        <div class="filter-label">学历要求</div>
+                        <div class="filter-options" data-group="education" data-type="multi">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="初中及以下">初中及以下</div>
+                            <div class="filter-option" data-value="中专/中技">中专/中技</div>
+                            <div class="filter-option" data-value="高中">高中</div>
+                            <div class="filter-option" data-value="大专">大专</div>
+                            <div class="filter-option" data-value="本科">本科</div>
+                            <div class="filter-option" data-value="硕士">硕士</div>
+                            <div class="filter-option" data-value="博士">博士</div>
+                        </div>
+                    </div>
+
+                    <!-- 薪资待遇 -->
+                    <div class="filter-row">
+                        <div class="filter-label">薪资待遇<br><span style="font-size:12px;color:#bbb;">[单选]</span></div>
+                        <div class="filter-options" data-group="salary" data-type="single">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="3K以下">3K以下</div>
+                            <div class="filter-option" data-value="3-5K">3-5K</div>
+                            <div class="filter-option" data-value="5-10K">5-10K</div>
+                            <div class="filter-option" data-value="10-20K">10-20K</div>
+                            <div class="filter-option" data-value="20-50K">20-50K</div>
+                            <div class="filter-option" data-value="50K以上">50K以上</div>
+                        </div>
+                    </div>
+
+                    <!-- 求职意向 -->
+                    <div class="filter-row">
+                        <div class="filter-label">求职意向</div>
+                        <div class="filter-options" data-group="jobIntention" data-type="multi">
+                            <div class="filter-option selected" data-value="不限">不限</div>
+                            <div class="filter-option" data-value="离职-随时到岗">离职-随时到岗</div>
+                            <div class="filter-option" data-value="在职-暂不考虑">在职-暂不考虑</div>
+                            <div class="filter-option" data-value="在职-考虑机会">在职-考虑机会</div>
+                            <div class="filter-option" data-value="在职-月内到岗">在职-月内到岗</div>
+                        </div>
+                    </div>
+
+                    <!-- 其他备注 -->
+                    <div class="filter-row">
+                        <div class="filter-label">其他备注</div>
+                        <div class="filter-options column">
+                            <textarea class="job-title-input" name="remarks" rows="3" placeholder="其他需要补充的筛选条件或备注信息"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 提交栏 -->
+                <div class="submit-bar">
+                    <div class="tips" id="submitTips">提交后将由HR统一审核并在BOSS直聘平台执行筛选</div>
+                    <div style="display:flex;gap:12px;">
+                        <button type="button" class="btn btn-danger" id="deleteBtn" style="display:none;">删除此职位</button>
+                        <button type="reset" class="btn btn-secondary">重置</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">提交筛选条件</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle"></div>
+            <div class="toast-desc" id="toastDesc"></div>
+        </div>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // ========== 配置：后端 API 地址 ==========
+        const API_BASE = window.location.origin; // 自动适配本地和线上
+
+        let editingId = null; // 正在编辑的职位ID
+
+        // ========== 左侧职位列表渲染 ==========
+        async function renderJobList() {
+            const name = document.querySelector('input[name="submitterName"]').value.trim();
+            if (!name) {
+                document.getElementById('jobListEmpty').style.display = 'block';
+                document.getElementById('jobList').innerHTML = '';
+                document.getElementById('jobCount').textContent = '0';
+                console.log('[调试] 姓名为空，不加载列表');
+                return;
+            }
+
+            console.log('[调试] 正在加载姓名=' + name + ' 的职位列表...');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/submissions?name=${encodeURIComponent(name)}`);
+                console.log('[调试] API 响应状态:', res.status);
+                
+                const result = await res.json();
+                console.log('[调试] API 返回数据:', result);
+                
+                const submissions = result.data || [];
+
+                const jobListEl = document.getElementById('jobList');
+                const jobListEmpty = document.getElementById('jobListEmpty');
+                const jobCount = document.getElementById('jobCount');
+
+                jobCount.textContent = submissions.length;
+
+                if (submissions.length === 0) {
+                    jobListEmpty.style.display = 'block';
+                    jobListEl.innerHTML = '';
+                    return;
+                }
+
+                jobListEmpty.style.display = 'none';
+                jobListEl.innerHTML = submissions.map(item => `
+                    <div class="job-list-item ${editingId === item.id ? 'active' : ''}" data-id="${item.id}">
+                        <span class="job-delete" data-id="${item.id}">&times;</span>
+                        <div class="job-name">${escapeHtml(item.jobTitle || '未命名职位')}</div>
+                    </div>
+                `).join('');
+
+                // 绑定点击加载事件
+                jobListEl.querySelectorAll('.job-list-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('job-delete')) return;
+                        const id = item.dataset.id;
+                        loadSubmissionToForm(id);
+                    });
+                });
+
+                // 绑定删除事件
+                jobListEl.querySelectorAll('.job-delete').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const id = btn.dataset.id;
+                        if (confirm('确定要删除这个职位吗？')) {
+                            await deleteSubmission(id);
+                        }
+                    });
+                });
+
+            } catch (err) {
+                console.error('加载职位列表失败:', err);
+            }
+        }
+
+        async function deleteSubmission(id) {
+            try {
+                const res = await fetch(`${API_BASE}/api/submissions/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    if (editingId === id) {
+                        resetForm();
+                    }
+                    renderJobList();
+                    showToast('success', '删除成功', '职位已删除');
+                }
+            } catch (err) {
+                showToast('error', '删除失败', err.message);
+            }
+        }
+
+        async function loadSubmissionToForm(id) {
+            try {
+                const res = await fetch(`${API_BASE}/api/submissions`);
+                const result = await res.json();
+                const submissions = result.data || [];
+                const item = submissions.find(s => s.id == id);
+                if (!item) return;
+
+                editingId = id;
+                renderJobList();
+
+                // 更新表单标题
+                document.getElementById('formTitle').textContent = '编辑：' + (item.jobTitle || '未命名职位');
+                document.getElementById('submitBtn').textContent = '更新筛选条件';
+                document.getElementById('submitTips').textContent = '修改后点击更新按钮保存';
+                document.getElementById('deleteBtn').style.display = 'inline-block';
+
+                // 填充提交人信息
+                document.querySelector('input[name="submitterName"]').value = item.submitter?.name || '';
+
+                // 填充岗位名称
+                document.querySelector('input[name="jobTitle"]').value = item.jobTitle || '';
+
+                // 填充年龄
+                ageMin = item.age?.min || 16;
+                ageMax = item.age?.max === 'unlimited' ? MAX_AGE : (item.age?.max || MAX_AGE);
+                updateAgeSlider();
+
+                // 填充单选按钮组
+                setSingleValue('activity', item.activity || '不限');
+                setSingleValue('gender', item.gender || '不限');
+                setSingleValue('recentViewed', item.recentViewed || '不限');
+                setSingleValue('exchangedResume', item.exchangedResume || '近一个月没有');
+                setSingleValue('jobHop', item.jobHop || '不限');
+                setSingleValue('salary', item.salary || '不限');
+
+                // 填充多选按钮组
+                setMultiValue('experience', item.experience || ['不限']);
+                setMultiValue('education', item.education || ['不限']);
+                setMultiValue('jobIntention', item.jobIntention || ['不限']);
+                setMultiValue('school', item.school?.values || ['不限']);
+
+                // 填充第一学历
+                document.getElementById('firstDegree').checked = item.school?.firstDegreeOnly || false;
+                checkFirstDegree();
+
+                // 填充专业
+                majorList = item.major?.values || [];
+                if (majorList.length > 0) {
+                    renderMajorTags();
+                    document.querySelectorAll('[data-group="major"]').forEach(o => {
+                        if (o.dataset.value === '不限') {
+                            o.classList.remove('selected');
+                        }
+                    });
+                } else {
+                    majorTags.style.display = 'none';
+                    majorInputRow.style.display = 'none';
+                    document.querySelectorAll('[data-group="major"]').forEach(o => {
+                        if (o.dataset.value === '不限') {
+                            o.classList.add('selected');
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error('加载职位失败:', err);
+            }
+        }
+
+        function setSingleValue(groupName, value) {
+            const group = document.querySelector(`.filter-options[data-group="${groupName}"][data-type="single"]`);
+            if (!group) return;
+            group.querySelectorAll('.filter-option').forEach(o => {
+                const isMatch = o.dataset.value === value;
+                o.classList.toggle('selected', isMatch);
+            });
+        }
+
+        function setMultiValue(groupName, values) {
+            const group = document.querySelector(`.filter-options[data-group="${groupName}"][data-type="multi"]`);
+            if (!group) return;
+            const valueSet = new Set(values);
+            group.querySelectorAll('.filter-option').forEach(o => {
+                const isMatch = valueSet.has(o.dataset.value);
+                o.classList.toggle('selected', isMatch);
+            });
+        }
+
+        // ========== 单选/多选按钮组逻辑（修复bug：改用div，不用label） ==========
+        document.querySelectorAll('.filter-options[data-type="single"]').forEach(group => {
+            const options = group.querySelectorAll('.filter-option');
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    options.forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                });
+            });
+        });
+
+        document.querySelectorAll('.filter-options[data-type="multi"]').forEach(group => {
+            const options = group.querySelectorAll('.filter-option');
+            const unlimited = Array.from(options).find(o => o.dataset.value === '不限');
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const value = option.dataset.value;
+
+                    if (value === '不限') {
+                        options.forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                    } else {
+                        if (unlimited) {
+                            unlimited.classList.remove('selected');
+                        }
+                        option.classList.toggle('selected');
+
+                        const anySelected = Array.from(options).some(o =>
+                            o.dataset.value !== '不限' && o.classList.contains('selected')
+                        );
+                        if (!anySelected && unlimited) {
+                            unlimited.classList.add('selected');
+                        }
+                    }
+
+                    if (group.dataset.group === 'school') {
+                        checkFirstDegree();
+                    }
+                });
+            });
+        });
+
+        // ========== 专业切换 ==========
+        const majorOptions = document.querySelectorAll('[data-group="major"]');
+        const majorInputRow = document.getElementById('majorInputRow');
+        const majorInput = document.getElementById('majorInput');
+        const majorTags = document.getElementById('majorTags');
+        const modifyLink = document.getElementById('modifyMajorLink');
+        const confirmMajorBtn = document.getElementById('confirmMajorBtn');
+        let majorList = [];
+
+        modifyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            majorInputRow.style.display = majorInputRow.style.display === 'none' ? 'flex' : 'none';
+            if (majorInputRow.style.display === 'flex') {
+                majorInput.focus();
+            }
+        });
+
+        confirmMajorBtn.addEventListener('click', addMajorFromInput);
+        majorInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addMajorFromInput();
+            }
+        });
+
+        function addMajorFromInput() {
+            const value = majorInput.value.trim();
+            if (!value) return;
+            if (!majorList.includes(value)) {
+                majorList.push(value);
+                renderMajorTags();
+                majorOptions.forEach(o => {
+                    if (o.dataset.value === '不限') {
+                        o.classList.remove('selected');
+                    }
+                });
+            }
+            majorInput.value = '';
+            majorTags.style.display = 'flex';
+        }
+
+        function renderMajorTags() {
+            majorTags.innerHTML = majorList.map(m => `
+                <span class="major-tag">${escapeHtml(m)}<span class="remove" data-value="${escapeHtml(m)}">&times;</span></span>
+            `).join('');
+            majorTags.querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    majorList = majorList.filter(m => m !== btn.dataset.value);
+                    renderMajorTags();
+                    if (majorList.length === 0) {
+                        majorTags.style.display = 'none';
+                        majorOptions.forEach(o => {
+                            if (o.dataset.value === '不限') {
+                                o.classList.add('selected');
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // 院校公办本科 -> 显示只看第一学历
+        function checkFirstDegree() {
+            const schoolOptions = document.querySelectorAll('[data-group="school"]');
+            const selectedPublic = Array.from(schoolOptions).some(o =>
+                o.dataset.value === '公办本科' && o.classList.contains('selected')
+            );
+            const firstDegreeOption = document.getElementById('firstDegreeOption');
+            firstDegreeOption.style.display = selectedPublic ? 'flex' : 'none';
+            if (!selectedPublic) {
+                document.getElementById('firstDegree').checked = false;
+            }
+        }
+
+        // ========== 年龄双滑块 ==========
+        const MIN_AGE = 16;
+        const MAX_AGE = 60;
+        const ageSlider = document.getElementById('ageSlider');
+        const ageThumbMin = document.getElementById('ageThumbMin');
+        const ageThumbMax = document.getElementById('ageThumbMax');
+        const ageFill = document.getElementById('ageFill');
+        const ageValue = document.getElementById('ageValue');
+        const ageMinInput = document.getElementById('ageMinInput');
+        const ageMaxInput = document.getElementById('ageMaxInput');
+
+        let ageMin = 16;
+        let ageMax = MAX_AGE;
+        let draggingThumb = null;
+
+        function updateAgeSlider() {
+            const minPercent = ((ageMin - MIN_AGE) / (MAX_AGE - MIN_AGE)) * 100;
+            const maxPercent = ((ageMax - MIN_AGE) / (MAX_AGE - MIN_AGE)) * 100;
+            ageThumbMin.style.left = minPercent + '%';
+            ageThumbMax.style.left = maxPercent + '%';
+            ageFill.style.left = minPercent + '%';
+            ageFill.style.width = (maxPercent - minPercent) + '%';
+
+            if (ageMax >= MAX_AGE) {
+                ageValue.textContent = ageMin === MIN_AGE ? '不限' : `${ageMin} - 不限`;
+                ageMaxInput.value = 'unlimited';
+            } else {
+                ageValue.textContent = ageMin === ageMax ? `${ageMin}` : `${ageMin} - ${ageMax}`;
+                ageMaxInput.value = ageMax;
+            }
+            ageMinInput.value = ageMin;
+        }
+
+        function handleAgeDrag(e) {
+            if (!draggingThumb) return;
+            const rect = ageSlider.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let percent = (clientX - rect.left) / rect.width;
+            percent = Math.max(0, Math.min(1, percent));
+            let age = Math.round(MIN_AGE + percent * (MAX_AGE - MIN_AGE));
+
+            if (draggingThumb === 'min') {
+                ageMin = Math.min(age, ageMax - 1);
+            } else {
+                ageMax = Math.max(age, ageMin + 1);
+                if (ageMax >= MAX_AGE - 1) ageMax = MAX_AGE;
+            }
+            updateAgeSlider();
+        }
+
+        ageThumbMin.addEventListener('mousedown', () => { draggingThumb = 'min'; ageThumbMin.classList.add('dragging'); });
+        ageThumbMin.addEventListener('touchstart', () => { draggingThumb = 'min'; ageThumbMin.classList.add('dragging'); }, { passive: true });
+        ageThumbMax.addEventListener('mousedown', () => { draggingThumb = 'max'; ageThumbMax.classList.add('dragging'); });
+        ageThumbMax.addEventListener('touchstart', () => { draggingThumb = 'max'; ageThumbMax.classList.add('dragging'); }, { passive: true });
+
+        document.addEventListener('mousemove', handleAgeDrag);
+        document.addEventListener('touchmove', handleAgeDrag, { passive: true });
+        document.addEventListener('mouseup', () => {
+            draggingThumb = null;
+            ageThumbMin.classList.remove('dragging');
+            ageThumbMax.classList.remove('dragging');
+        });
+        document.addEventListener('touchend', () => {
+            draggingThumb = null;
+            ageThumbMin.classList.remove('dragging');
+            ageThumbMax.classList.remove('dragging');
+        });
+
+        ageSlider.addEventListener('click', (e) => {
+            if (e.target.classList.contains('slider-thumb')) return;
+            const rect = ageSlider.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const age = Math.round(MIN_AGE + percent * (MAX_AGE - MIN_AGE));
+            const distMin = Math.abs(age - ageMin);
+            const distMax = Math.abs(age - ageMax);
+            if (distMin <= distMax) {
+                ageMin = Math.min(age, ageMax - 1);
+            } else {
+                ageMax = Math.max(age, ageMin + 1);
+                if (ageMax >= MAX_AGE - 1) ageMax = MAX_AGE;
+            }
+            updateAgeSlider();
+        });
+
+        updateAgeSlider();
+
+        // ========== Toast 提示 ==========
+        function showToast(type, title, desc) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            toast.className = 'toast ' + type + ' show';
+            icon.textContent = type === 'success' ? '✓' : '✗';
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastDesc').textContent = desc || '';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('show', show);
+        }
+
+        // ========== 表单提交 ==========
+        document.getElementById('screeningForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+
+            function getCheckedValues(name) {
+                const values = [];
+                document.querySelectorAll(`.filter-options[data-group="${name}"][data-type="multi"] .filter-option.selected`).forEach(el => {
+                    values.push(el.dataset.value);
+                });
+                return values.length ? values : ['不限'];
+            }
+
+            function getSingleValue(name) {
+                const el = document.querySelector(`.filter-options[data-group="${name}"][data-type="single"] .filter-option.selected`);
+                return el ? el.dataset.value : '不限';
+            }
+
+            const data = {
+                submitter: {
+                    name: formData.get('submitterName')
+                },
+                jobTitle: formData.get('jobTitle'),
+                age: {
+                    min: ageMin,
+                    max: ageMax >= MAX_AGE ? 'unlimited' : ageMax
+                },
+                major: {
+                    type: '自定义',
+                    values: majorList
+                },
+                activity: getSingleValue('activity'),
+                gender: getSingleValue('gender'),
+                recentViewed: getSingleValue('recentViewed'),
+                exchangedResume: getSingleValue('exchangedResume'),
+                school: {
+                    values: getCheckedValues('school'),
+                    firstDegreeOnly: document.getElementById('firstDegree').checked
+                },
+                jobHop: getSingleValue('jobHop'),
+                experience: getCheckedValues('experience'),
+                education: getCheckedValues('education'),
+                salary: getSingleValue('salary'),
+                jobIntention: getCheckedValues('jobIntention'),
+                remarks: formData.get('remarks') || '',
+                submittedAt: new Date().toISOString()
+            };
+
+            showLoading(true);
+
+            try {
+                let url = `${API_BASE}/api/submit`;
+                let method = 'POST';
+
+                if (editingId) {
+                    url = `${API_BASE}/api/submissions/${editingId}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    // 提交成功后，确保姓名保存到 localStorage
+                    const submitterName = document.querySelector('input[name="submitterName"]').value.trim();
+                    if (submitterName) {
+                        localStorage.setItem('boss_submitter_name', submitterName);
+                    }
+                    showToast('success', editingId ? '更新成功' : '提交成功', editingId ? '筛选条件已更新' : '筛选条件已保存，可在左侧列表查看');
+                    resetForm();
+                    renderJobList();
+                } else {
+                    showToast('error', '操作失败', result.message);
+                }
+            } catch (err) {
+                showToast('error', '提交失败', err.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function resetForm() {
+            editingId = null;
+            document.getElementById('formTitle').textContent = '半岛医疗招聘 · 简历筛选条件提交';
+            document.getElementById('submitBtn').textContent = '提交筛选条件';
+            document.getElementById('submitTips').textContent = '提交后将由HR统一审核并在BOSS直聘平台执行筛选';
+            document.getElementById('deleteBtn').style.display = 'none';
+
+            // 保留姓名，不清空（方便连续提交多个职位）
+            const savedName = document.querySelector('input[name="submitterName"]').value;
+            document.getElementById('screeningForm').reset();
+            if (savedName) {
+                document.querySelector('input[name="submitterName"]').value = savedName;
+            }
+
+            // 重置所有单选/多选到默认
+            document.querySelectorAll('.filter-options[data-type="single"]').forEach(group => {
+                const options = group.querySelectorAll('.filter-option');
+                options.forEach((o, i) => {
+                    o.classList.toggle('selected', i === 0);
+                });
+            });
+            document.querySelectorAll('.filter-options[data-type="multi"]').forEach(group => {
+                const options = group.querySelectorAll('.filter-option');
+                options.forEach(o => {
+                    o.classList.toggle('selected', o.dataset.value === '不限');
+                });
+            });
+            // 重置专业
+            majorList = [];
+            majorTags.innerHTML = '';
+            majorTags.style.display = 'none';
+            majorInputRow.style.display = 'none';
+            // 重置院校子选项
+            document.getElementById('firstDegreeOption').style.display = 'none';
+            document.getElementById('firstDegree').checked = false;
+            // 重置年龄
+            ageMin = 16;
+            ageMax = MAX_AGE;
+            updateAgeSlider();
+        }
+
+        // ========== 工具函数 ==========
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ========== 记住姓名（刷新后自动加载列表） ==========
+        const nameInput = document.querySelector('input[name="submitterName"]');
+
+        // 页面加载时，从 localStorage 恢复姓名，并自动加载列表
+        const savedName = localStorage.getItem('boss_submitter_name');
+        if (savedName) {
+            nameInput.value = savedName;
+            console.log('[调试] 从 localStorage 恢复姓名:', savedName);
+            // 延迟 500ms 确保 DOM 完全加载
+            setTimeout(() => {
+                console.log('[调试] 开始加载职位列表...');
+                renderJobList();
+            }, 500);
+        } else {
+            console.log('[调试] localStorage 中没有保存的姓名');
+        }
+
+        // 输入时实时保存姓名，并刷新列表
+        nameInput.addEventListener('input', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                localStorage.setItem('boss_submitter_name', name);
+            } else {
+                localStorage.removeItem('boss_submitter_name');
+            }
+            renderJobList();
+        });
+
+        // 失去焦点时也保存（兼容）
+        nameInput.addEventListener('blur', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                localStorage.setItem('boss_submitter_name', name);
+            }
+            renderJobList();
+        });
+    </script>
+</body>
+</html>
