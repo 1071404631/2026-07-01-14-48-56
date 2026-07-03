@@ -616,7 +616,7 @@
                         <div class="record-actions">
                             <button class="action-btn" onclick="viewDetail(${realIdx})">查看详情</button>
                             <button class="action-btn" onclick="exportSingle(${realIdx})">导出此条</button>
-                            <button class="action-btn danger" onclick="deleteRecord(${realIdx})">删除</button>
+                            <button class="action-btn danger" onclick="deleteRecord('${r.id}')">删除</button>
                         </div>
                     </div>
                 `;
@@ -714,9 +714,12 @@
             if (e.target === e.currentTarget) closeModal();
         });
 
-        async function deleteRecord(idx) {
-            const record = allRecords[idx];
-            if (!record) return;
+        async function deleteRecord(recordId) {
+            const record = allRecords.find(r => String(r.id) === String(recordId));
+            if (!record) {
+                alert('未找到该记录');
+                return;
+            }
             if (!confirm('确认删除这条记录？删除后不可恢复。')) return;
             try {
                 const res = await fetch(`/api/submissions?id=${encodeURIComponent(record.id)}`, { method: 'DELETE' });
