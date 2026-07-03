@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
         // 按姓名筛选
         if (name) {
-            records = records.filter(r => r.submitterName === name);
+            records = records.filter(r => r.submitter && r.submitter.name === name);
         }
 
         return res.status(200).json({ success: true, data: records });
