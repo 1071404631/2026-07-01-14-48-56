@@ -1,14 +1,26 @@
-// Vercel Serverless Function - 获取/删除筛选条件列表
+// Vercel Serverless Function - 获取/更新/删除筛选条件列表
 const { URL } = require('url');
 
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || 'YOUR_JSONBIN_API_KEY';
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || 'YOUR_BIN_ID';
 
-// 获取查询参数（兼容 req.query）
-function getQuery(req) {
-    if (req.query && Object.keys(req.query).length > 0) return req.query;
-    const url = new URL(req.url, 'http://localhost');
-    return Object.fromEntries(url.searchParams);
+// 读取请求体（兼容 Vercel 自动解析和原始流）
+function getBody(req) {
+    return new Promise((resolve, reject) => {
+        if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+            return resolve(req.body);
+        }
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                resolve(body ? JSON.parse(body) : {});
+            } catch (e) {
+                reject(new Error('请求体 JSON 解析失败'));
+            }
+        });
+        req.on('error', reject);
+    });
 }
 
 async function readRecords() {
@@ -42,7 +54,7 @@ async function writeRecords(records) {
 
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
@@ -50,8 +62,13 @@ module.exports = async function handler(req, res) {
     }
 
     try {
+        const url = new URL(req.url, 'http://localhost');
+        // 解析路径 ID：/api/submissions/xxx
+        const pathMatch = url.pathname.match(/^\/api\/submissions(?:\/([^/]+))?$/);
+        const pathId = pathMatch ? pathMatch[1] : undefined;
+        const query = Object.fromEntries(url.searchParams);
+
         const records = await readRecords();
-        const query = getQuery(req);
 
         if (req.method === 'GET') {
             if (query.name) {
@@ -62,7 +79,8 @@ module.exports = async function handler(req, res) {
         }
 
         if (req.method === 'DELETE') {
-            const id = query.id;
+            // 同时支持 ?id=xxx 和 /api/submissions/xxx 两种传参方式
+            const id = query.id || pathId;
             if (!id) {
                 return res.status(400).json({ success: false, message: '缺少记录ID' });
             }
@@ -75,8 +93,30 @@ module.exports = async function handler(req, res) {
             return res.status(200).json({ success: true, message: '删除成功' });
         }
 
+        if (req.method === 'PUT') {
+            const id = query.id || pathId;
+            if (!id) {
+                return res.status(400).json({ success: false, message: '缺少记录ID' });
+            }
+            const body = await getBody(req);
+            const idx = records.findIndex(r => String(r.id) === String(id));
+            if (idx === -1) {
+                return res.status(404).json({ success: false, message: '未找到该记录' });
+            }
+            // 保留原 id 和 createdAt，其他字段覆盖
+            records[idx] = {
+                ...records[idx],
+                ...body,
+                id: records[idx].id,
+                createdAt: records[idx].createdAt
+            };
+            await writeRecords(records);
+            return res.status(200).json({ success: true, message: '更新成功' });
+        }
+
         return res.status(405).json({ success: false, message: 'Method not allowed' });
     } catch (error) {
+        console.error('Submissions error:', error);
         return res.status(500).json({ success: false, message: error.message });
     }
 };

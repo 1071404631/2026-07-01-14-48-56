@@ -984,14 +984,23 @@
 
         async function deleteSubmission(id) {
             try {
-                const res = await fetch(`${API_BASE}/api/submissions/${id}`, { method: 'DELETE' });
-                const result = await res.json();
+                const res = await fetch(`${API_BASE}/api/submissions?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+                let result;
+                try {
+                    result = await res.json();
+                } catch (parseErr) {
+                    const text = await res.text();
+                    showToast('error', '删除失败', '服务器返回非预期内容：' + text.slice(0, 100));
+                    return;
+                }
                 if (result.success) {
                     if (editingId === id) {
                         resetForm();
                     }
                     renderJobList();
                     showToast('success', '删除成功', '职位已删除');
+                } else {
+                    showToast('error', '删除失败', result.message || '未知错误');
                 }
             } catch (err) {
                 showToast('error', '删除失败', err.message);
@@ -1365,7 +1374,7 @@
                 let method = 'POST';
 
                 if (editingId) {
-                    url = `${API_BASE}/api/submissions/${editingId}`;
+                    url = `${API_BASE}/api/submissions?id=${encodeURIComponent(editingId)}`;
                     method = 'PUT';
                 }
 
