@@ -1,13 +1,65 @@
 // Vercel Serverless Function - 获取/更新/删除筛选条件列表
 const { URL } = require('url');
+const https = require('https');
 
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || 'YOUR_JSONBIN_API_KEY';
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || 'YOUR_BIN_ID';
 
+// 使用 Node 原生 https 请求 JSONBin，避免 fetch 运行时差异
+function jsonbinRequest(path, method = 'GET', body = null) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            hostname: 'api.jsonbin.io',
+            path: path,
+            method: method,
+            headers: {
+                'X-Master-Key': JSONBIN_API_KEY,
+                ...(body ? { 'Content-Type': 'application/json' } : {})
+            }
+        };
+
+        const request = https.request(options, (response) => {
+            let data = '';
+            response.on('data', chunk => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    const status = response.statusCode || 0;
+                    const parsed = data ? JSON.parse(data) : null;
+                    if (status >= 200 && status < 300) {
+                        resolve({ status, data: parsed });
+                    } else {
+                        reject(new Error(`JSONBin ${method} ${path} 失败 (${status}): ${data}`));
+                    }
+                } catch (e) {
+                    reject(new Error(`JSONBin 响应解析失败: ${e.message}`));
+                }
+            });
+        });
+
+        request.on('error', (err) => reject(new Error(`JSONBin 请求失败: ${err.message}`)));
+
+        if (body) {
+            request.write(JSON.stringify(body));
+        }
+        request.end();
+    });
+}
+
+async function readRecords() {
+    const result = await jsonbinRequest(`/v3/b/${JSONBIN_BIN_ID}/latest`, 'GET');
+    let records = (result.data && result.data.record && result.data.record.records) || [];
+    if (!Array.isArray(records)) records = [];
+    return records;
+}
+
+async function writeRecords(records) {
+    await jsonbinRequest(`/v3/b/${JSONBIN_BIN_ID}`, 'PUT', { records });
+}
+
 // 读取请求体（兼容 Vercel 自动解析和原始流）
 function getBody(req) {
     return new Promise((resolve, reject) => {
-        if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+        if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body) && !(req.body instanceof Uint8Array) && Object.keys(req.body).length > 0) {
             return resolve(req.body);
         }
         let body = '';
@@ -23,47 +75,18 @@ function getBody(req) {
     });
 }
 
-async function readRecords() {
-    const getRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-        headers: { 'X-Master-Key': JSONBIN_API_KEY }
-    });
-    if (!getRes.ok) {
-        const text = await getRes.text();
-        throw new Error(`JSONBin 读取失败 (${getRes.status}): ${text}`);
-    }
-    const getData = await getRes.json();
-    let records = (getData.record && getData.record.records) || [];
-    if (!Array.isArray(records)) records = [];
-    return records;
-}
-
-async function writeRecords(records) {
-    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_API_KEY
-        },
-        body: JSON.stringify({ records })
-    });
-    if (!putRes.ok) {
-        const text = await putRes.text();
-        throw new Error(`JSONBin 写入失败 (${putRes.status}): ${text}`);
-    }
-}
-
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        res.statusCode = 200;
+        return res.end();
     }
 
     try {
         const url = new URL(req.url, 'http://localhost');
-        // 解析路径 ID：/api/submissions/xxx
         const pathMatch = url.pathname.match(/^\/api\/submissions(?:\/([^/]+))?$/);
         const pathId = pathMatch ? pathMatch[1] : undefined;
         const query = Object.fromEntries(url.searchParams);
@@ -73,37 +96,42 @@ module.exports = async function handler(req, res) {
         if (req.method === 'GET') {
             if (query.name) {
                 const result = records.filter(r => r.submitter && r.submitter.name === query.name);
-                return res.status(200).json({ success: true, data: result });
+                res.statusCode = 200;
+                return res.end(JSON.stringify({ success: true, data: result }));
             }
-            return res.status(200).json({ success: true, data: records });
+            res.statusCode = 200;
+            return res.end(JSON.stringify({ success: true, data: records }));
         }
 
         if (req.method === 'DELETE') {
-            // 同时支持 ?id=xxx 和 /api/submissions/xxx 两种传参方式
             const id = query.id || pathId;
             if (!id) {
-                return res.status(400).json({ success: false, message: '缺少记录ID' });
+                res.statusCode = 400;
+                return res.end(JSON.stringify({ success: false, message: '缺少记录ID' }));
             }
             const before = records.length;
             const newRecords = records.filter(r => String(r.id) !== String(id));
             if (newRecords.length === before) {
-                return res.status(404).json({ success: false, message: '未找到该记录' });
+                res.statusCode = 404;
+                return res.end(JSON.stringify({ success: false, message: '未找到该记录' }));
             }
             await writeRecords(newRecords);
-            return res.status(200).json({ success: true, message: '删除成功' });
+            res.statusCode = 200;
+            return res.end(JSON.stringify({ success: true, message: '删除成功' }));
         }
 
         if (req.method === 'PUT') {
             const id = query.id || pathId;
             if (!id) {
-                return res.status(400).json({ success: false, message: '缺少记录ID' });
+                res.statusCode = 400;
+                return res.end(JSON.stringify({ success: false, message: '缺少记录ID' }));
             }
             const body = await getBody(req);
             const idx = records.findIndex(r => String(r.id) === String(id));
             if (idx === -1) {
-                return res.status(404).json({ success: false, message: '未找到该记录' });
+                res.statusCode = 404;
+                return res.end(JSON.stringify({ success: false, message: '未找到该记录' }));
             }
-            // 保留原 id 和 createdAt，其他字段覆盖
             records[idx] = {
                 ...records[idx],
                 ...body,
@@ -111,12 +139,15 @@ module.exports = async function handler(req, res) {
                 createdAt: records[idx].createdAt
             };
             await writeRecords(records);
-            return res.status(200).json({ success: true, message: '更新成功' });
+            res.statusCode = 200;
+            return res.end(JSON.stringify({ success: true, message: '更新成功' }));
         }
 
-        return res.status(405).json({ success: false, message: 'Method not allowed' });
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ success: false, message: 'Method not allowed' }));
     } catch (error) {
         console.error('Submissions error:', error);
-        return res.status(500).json({ success: false, message: error.message });
+        res.statusCode = 500;
+        return res.end(JSON.stringify({ success: false, message: error.message }));
     }
 };
