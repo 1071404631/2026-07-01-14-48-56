@@ -3,6 +3,37 @@
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || 'YOUR_JSONBIN_API_KEY';
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || 'YOUR_BIN_ID';
 
+async function readRecords() {
+    const getRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+        headers: {
+            'X-Master-Key': JSONBIN_API_KEY
+        }
+    });
+    if (!getRes.ok) {
+        const text = await getRes.text();
+        throw new Error(`JSONBin 读取失败 (${getRes.status}): ${text}`);
+    }
+    const getData = await getRes.json();
+    let records = (getData.record && getData.record.records) || [];
+    if (!Array.isArray(records)) records = [];
+    return records;
+}
+
+async function writeRecords(records) {
+    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY
+        },
+        body: JSON.stringify({ records })
+    });
+    if (!putRes.ok) {
+        const text = await putRes.text();
+        throw new Error(`JSONBin 写入失败 (${putRes.status}): ${text}`);
+    }
+}
+
 export default async function handler(req, res) {
     // 设置 CORS 头
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,24 +45,16 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 从 JSONBin 获取数据
-        const getRes = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: {
-                'X-Master-Key': JSONBIN_API_KEY
-            }
-        });
-        const getData = await getRes.json();
-        let records = (getData.record && getData.record.records) || [];
-
-        if (!Array.isArray(records)) records = [];
+        const records = await readRecords();
 
         // GET：获取记录列表
         if (req.method === 'GET') {
             const { name } = req.query;
+            let result = records;
             if (name) {
-                records = records.filter(r => r.submitter && r.submitter.name === name);
+                result = records.filter(r => r.submitter && r.submitter.name === name);
             }
-            return res.status(200).json({ success: true, data: records });
+            return res.status(200).json({ success: true, data: result });
         }
 
         // DELETE：删除指定记录
@@ -42,23 +65,13 @@ export default async function handler(req, res) {
             }
 
             const before = records.length;
-            records = records.filter(r => String(r.id) !== String(id));
-            const after = records.length;
+            const newRecords = records.filter(r => String(r.id) !== String(id));
 
-            if (before === after) {
+            if (newRecords.length === before) {
                 return res.status(404).json({ success: false, message: '未找到该记录' });
             }
 
-            // 保存回 JSONBin
-            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_API_KEY
-                },
-                body: JSON.stringify({ records })
-            });
-
+            await writeRecords(newRecords);
             return res.status(200).json({ success: true, message: '删除成功' });
         }
 

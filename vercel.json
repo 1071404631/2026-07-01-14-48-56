@@ -1,6 +1,10 @@
 {
-  "rewrites": [
-    { "source": "/api/submit", "destination": "/api/submit.js" },
-    { "source": "/api/submissions", "destination": "/api/submissions.js" }
-  ]
+  "functions": {
+    "api/submit.js": {
+      "maxDuration": 10
+    },
+    "api/submissions.js": {
+      "maxDuration": 10
+    }
+  }
 }
