@@ -34,7 +34,7 @@ async function writeRecords(records) {
     }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // 设置 CORS 头
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, OPTIONS');
@@ -80,4 +80,4 @@ export default async function handler(req, res) {
         console.error('Error:', error);
         return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
