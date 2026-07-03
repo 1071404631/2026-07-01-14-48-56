@@ -1,13 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.png", "use": "@vercel/static" },
-    { "src": "api/*.js", "use": "@vercel/node" }
-  ],
-  "routes": [
-    { "src": "/api/submit", "dest": "/api/submit.js" },
-    { "src": "/api/submissions", "dest": "/api/submissions.js" },
-    { "src": "/(.*)", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/api/submit", "destination": "/api/submit.js" },
+    { "source": "/api/submissions", "destination": "/api/submissions.js" }
   ]
 }
